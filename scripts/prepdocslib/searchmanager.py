@@ -79,6 +79,8 @@ class SearchManager:
                 SimpleField(name="category", type="Edm.String", filterable=True, facetable=True),
                 SimpleField(name="sourcepage", type="Edm.String", filterable=True, facetable=True),
                 SimpleField(name="sourcefile", type="Edm.String", filterable=True, facetable=True),
+                # Add level field to the index
+                #SimpleField(name="level", type="Edm.String", filterable=True, facetable=True),
             ]
             if self.use_acls:
                 fields.append(

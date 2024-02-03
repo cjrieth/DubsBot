@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Generator, List
+import re
 
 from .page import Page, SplitPage
 
@@ -108,6 +109,25 @@ class SentenceTextSplitter(TextSplitter):
 
         if start + self.section_overlap < end:
             yield SplitPage(page_num=find_page(start), text=all_text[start:end])
+
+class ScheduleTextSplitter(TextSplitter):
+    """
+    Class that splits pages into chunks that correspond to a single class offering in the schedule, no more, no less.
+    """
+
+    def __init__(self):
+        self.section_ending = "---------------------"
+
+    def split_pages(self, pages: List[Page]) -> Generator[SplitPage, None, None]:
+        # Chunking is disabled when using GPT4V. To be updated in the future.
+
+        all_text = "".join(page.text for page in pages)
+        if len(all_text.strip()) == 0:
+            return
+
+        for chunk in re.split(self.section_ending, all_text):
+            yield SplitPage(page_num=0, text=chunk)
+        
 
 
 class SimpleTextSplitter(TextSplitter):

@@ -17,7 +17,7 @@ from prepdocslib.embeddings import (
 from prepdocslib.fileprocessor import FileProcessor
 from prepdocslib.filestrategy import DocumentAction, FileStrategy
 from prepdocslib.jsonparser import JsonParser
-from prepdocslib.schedhtmlparser import HtmlParser
+from prepdocslib.schedhtmlparser import LocalHtmlParser, DocumentAnalysisHtmlParser
 from prepdocslib.listfilestrategy import (
     ADLSGen2ListFileStrategy,
     ListFileStrategy,
@@ -26,7 +26,7 @@ from prepdocslib.listfilestrategy import (
 from prepdocslib.parser import Parser
 from prepdocslib.pdfparser import DocumentAnalysisParser, LocalPdfParser
 from prepdocslib.strategy import SearchInfo, Strategy
-from prepdocslib.textsplitter import SentenceTextSplitter, SimpleTextSplitter
+from prepdocslib.textsplitter import SentenceTextSplitter, SimpleTextSplitter, ScheduleTextSplitter
 
 
 def is_key_empty(key):
@@ -78,7 +78,7 @@ async def setup_file_strategy(credential: AsyncTokenCredential, args: Any) -> Fi
         ".pdf": FileProcessor(pdf_parser, sentence_text_splitter),
         ".json": FileProcessor(JsonParser(), SimpleTextSplitter()),
         ".docx": FileProcessor(doc_int_parser, sentence_text_splitter),
-        ".html": FileProcessor(HtmlParser(), sentence_text_splitter), 
+        ".html": FileProcessor(LocalHtmlParser(), sentence_text_splitter), 
     }
     use_vectors = not args.novectors
     embeddings: Optional[OpenAIEmbeddings] = None
