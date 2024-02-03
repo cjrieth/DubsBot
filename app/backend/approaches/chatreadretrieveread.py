@@ -112,6 +112,25 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                         "required": ["search_query"],
                     },
                 },
+                "type": "function",
+                "function": {
+                    "name": "search_by_level",
+                    "description": "Filter search by class level",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "search_query": {
+                                "type": "string",
+                                "description": "If the ask is related to a class at a certain level eg: 'Show me the details for 100 level classes' then filter the results to only classes at the 100 level and show the details.",
+                            },
+                            "level": {
+                                "type": "string",
+                                "description": "If the ask is related to a class at a certain level eg: 'Show me the details for 100 level classes' set to the level they are querying",
+                            }
+                        },
+                        "required": ["search_query", "level"],
+                    },
+                },
             }
         ]
 
@@ -137,6 +156,16 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         )
 
         query_text = self.get_search_query(chat_completion, original_user_query)
+
+        if isinstance(query_text, dict):
+            # update the filters to narrow down class by level
+            level = query_text.get("level")
+            if level:
+                if not filter:
+                    filter = "level ge " + str(level) + " and level lt " + str(int(level) + 100)
+                else:
+                    filter += "and level ge " + str(level) + " and level lt " + str(level + 100)
+            query_text = query_text.get("search_query")
 
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
 

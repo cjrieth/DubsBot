@@ -69,7 +69,7 @@ class LocalHtmlParser(Parser):
                     j = 0
                     for string in doc_tables[i].stripped_strings:
                         if j == 0:
-                            #transformed_sched += "---------------------\n"
+                            transformed_sched += "---------------------\n"
                             split_string = re.split("\s{2}", string)
                             transformed_sched += "Class: " + split_string[0] +  split_string[1]
                             last_class_name = string

@@ -81,6 +81,10 @@ class ChatApproach(Approach, ABC):
                     search_query = arg.get("search_query", self.NO_RESPONSE)
                     if search_query != self.NO_RESPONSE:
                         return search_query
+                if function.name == "search_by_level":
+                    arg = json.loads(function.arguments)
+                    return arg
+                    
         elif query_text := response_message.content:
             if query_text.strip() != self.NO_RESPONSE:
                 return query_text

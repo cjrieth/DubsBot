@@ -126,7 +126,13 @@ class ScheduleTextSplitter(TextSplitter):
             return
 
         for chunk in re.split(self.section_ending, all_text):
-            yield SplitPage(page_num=0, text=chunk)
+            class_location = chunk.find("Class: ")
+            if class_location > 0:
+                ind = class_location + len("Class: ")
+                level = int(re.split(" ", chunk[ind:])[1])
+            else:
+                level = 0
+            yield SplitPage(page_num=0, text=chunk, level=level)
         
 
 
