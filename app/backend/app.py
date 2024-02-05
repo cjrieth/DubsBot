@@ -212,7 +212,7 @@ async def setup_clients():
     AZURE_STORAGE_CONTAINER = os.environ["AZURE_STORAGE_CONTAINER"]
     AZURE_SEARCH_SERVICE = os.environ["AZURE_SEARCH_SERVICE"]
     AZURE_SEARCH_INDEX = os.environ["AZURE_SEARCH_INDEX"]
-    SEARCH_SECRET_NAME = os.getenv("SEARCH_SECRET_NAME")
+    SEARCH_SECRET_NAME = os.getenv("AZURE_SEARCH_SECRET_NAME")
     VISION_SECRET_NAME = os.getenv("VISION_SECRET_NAME")
     AZURE_KEY_VAULT_NAME = os.getenv("AZURE_KEY_VAULT_NAME")
     # Shared by all OpenAI deployments

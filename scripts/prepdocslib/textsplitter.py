@@ -112,7 +112,7 @@ class SentenceTextSplitter(TextSplitter):
 
 class ScheduleTextSplitter(TextSplitter):
     """
-    Class that splits pages into chunks that correspond to a single class offering in the schedule, no more, no less.
+    Class that splits pages into chunks that correspond to a single UW class offering in the schedule, no more, no less.
     """
 
     def __init__(self):
@@ -128,8 +128,7 @@ class ScheduleTextSplitter(TextSplitter):
         for chunk in re.split(self.section_ending, all_text):
             class_location = chunk.find("Class: ")
             if class_location > 0:
-                ind = class_location + len("Class: ")
-                level = int(re.split(" ", chunk[ind:])[1])
+                level = int(re.search("[0-9]+", chunk).group())
             else:
                 level = 0
             yield SplitPage(page_num=0, text=chunk, level=level)

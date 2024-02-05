@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap');
+
+
 .layout {
     display: flex;
     flex-direction: column;
@@ -5,7 +8,7 @@
 }
 
 .header {
-    background-color: #222222;
+    background-color: #32006e;
     color: #f2f2f2;
 }
 
@@ -18,6 +21,7 @@
 }
 
 .headerTitleContainer {
+    font-family: 'Open Sans', sans-serif;
     display: flex;
     align-items: center;
     margin-right: 40px;
@@ -36,12 +40,14 @@
 
 .headerNavList {
     display: flex;
+    font-family: 'Open Sans', sans-serif;
     list-style: none;
     padding-left: 0;
 }
 
 .headerNavPageLink {
     color: #f2f2f2;
+    font-family: 'Open Sans', sans-serif;
     text-decoration: none;
     opacity: 0.75;
 
@@ -51,11 +57,13 @@
 }
 
 .headerNavPageLink:hover {
+    font-family: 'Open Sans', sans-serif;
     opacity: 1;
 }
 
 .headerNavPageLinkActive {
     color: #f2f2f2;
+    font-family: 'Open Sans', sans-serif;
     text-decoration: none;
 }
 
@@ -64,7 +72,7 @@
 }
 
 .headerRightText {
-    font-weight: normal;
+    font-family: 'Open Sans', sans-serif;
     margin-left: 40px;
 }
 

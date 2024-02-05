@@ -94,8 +94,8 @@ class LocalHtmlParser(Parser):
                     else:
                         transformed_sched += "Lab Section: "
 
-                    regex_edit = re.findall("(?<!^) [M|T|W|Th|F]+ ", section_info)
-                    regex_split =  re.split("(?<!^) [M|T|W|Th|F]+ ", section_info)
+                    regex_edit = re.findall("(?<!^) [M|T|W|Th|F]+[ ]+[0-9]", section_info)
+                    regex_split =  re.split("(?<!^) [M|T|W|Th|F]+[ ]+[0-9]", section_info)
                     regex_final = regex_split[0]
                     expanded_string = ""
                     for j in range (len(regex_edit)):
@@ -113,13 +113,16 @@ class LocalHtmlParser(Parser):
                                 expanded_string += "Friday"
                         # last_piece = re.split("[a-zA-Z0-9\\-]+", regex_split[j + 1], maxsplit=1)
                         # last_piece2 = re.split("[a-zA-Z]+", regex_split[j + 1], maxsplit=1)
-                        regex_final += expanded_string + "  Meeting Time: " + regex_split[j + 1]
+                        regex_final += expanded_string + "  Meeting Time: " + regex_edit[j][-1:] + regex_split[j + 1]
                         # if len(last_piece) > 1:
                         #     regex_final += " Meeting Room/Location: " + last_piece[1].strip()
                     transformed_sched += regex_final + "\n\n"
 
+            # compress whitespace
+            transformed_sched = re.sub("[ \t]+", " ", transformed_sched)
+
             # with open(h2_tag.contents[0] + '.txt', "w") as debug_output:
-            #     debug_output.write(transformed_sched)
+            #      debug_output.write(transformed_sched)
 
             yield Page(0, 0, transformed_sched)
             
