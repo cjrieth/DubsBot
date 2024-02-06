@@ -92,7 +92,7 @@ class SentenceTextSplitter(TextSplitter):
                 start += 1
 
             section_text = all_text[start:end]
-            yield SplitPage(page_num=find_page(start), text=section_text)
+            yield SplitPage(level=0, page_num=find_page(start), text=section_text)
 
             last_table_start = section_text.rfind("<table")
             if last_table_start > 2 * self.sentence_search_limit and last_table_start > section_text.rfind("</table"):
@@ -108,7 +108,7 @@ class SentenceTextSplitter(TextSplitter):
                 start = end - self.section_overlap
 
         if start + self.section_overlap < end:
-            yield SplitPage(page_num=find_page(start), text=all_text[start:end])
+            yield SplitPage(level=0, page_num=find_page(start), text=all_text[start:end])
 
 class ScheduleTextSplitter(TextSplitter):
     """
@@ -129,9 +129,11 @@ class ScheduleTextSplitter(TextSplitter):
             class_location = chunk.find("Class: ")
             if class_location > 0:
                 level = int(re.search("[0-9]+", chunk).group())
+                major = re.search("[a-zA-Z ]+", chunk[class_location + 7:]).group().strip()
             else:
                 level = 0
-            yield SplitPage(page_num=0, text=chunk, level=level)
+                major = ""
+            yield SplitPage(page_num=0, text=chunk, level=level, major=major)
         
 
 

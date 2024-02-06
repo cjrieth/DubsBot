@@ -52,7 +52,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
     @property
     def system_message_chat_conversation(self):
-        return """You are the friendly University of Washington school mascot, a Husky named Dubs. You assist students in planning their course schedules and degree goals. Act animated and behave like a dog. Be enthusiastic.
+        return """You are the friendly University of Washington school mascot, a Husky named Dubs. You assist students in planning their course schedules and degree goals. Act animated and behave like a dog.
         Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
         For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question.
         Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
@@ -95,6 +95,8 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         original_user_query = history[-1]["content"]
         user_query_request = "Generate search query for: " + original_user_query
 
+        # Add a funciton to only do text search on professor name
+
         tools: List[ChatCompletionToolParam] = [
             {
                 "type": "function",
@@ -114,25 +116,45 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                 },
                 "type": "function",
                 "function": {
-                    "name": "search_by_level",
-                    "description": "Filter search by class level",
+                    "name": "filtered_search",
+                    "description": "Filter search with more specific fields",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "search_query": {
                                 "type": "string",
-                                "description": "If the ask is related to a class at a certain level eg: 'Show me the details for 100 level classes' then filter the results to only classes at the 100 level and show the details.",
+                                "description": "If the ask is related to a specific major and/or a specific level eg: 'Show me some 300 level cse classes' put the whole query here.",
+                            },
+                            "major": {
+                                "type": "string",
+                                "description": "If the ask is related to a specific major eg: 'Show me some cse classes' set to the major they are querying.",
                             },
                             "level": {
                                 "type": "string",
-                                "description": "If the ask is related to a class at a certain level eg: 'Show me the details for 100 level classes' set to the level they are querying",
+                                "description": "If the ask is related to a class at a certain level eg: 'Show me the details for 100 level classes' set to the level they are querying.",
                             }
                         },
-                        "required": ["search_query", "level"],
+                        "required": ["search_query", "level", "major"],
                     },
                 },
             }
         ]
+
+                #         "type": "function",
+                # "function": {
+                #     "name": "search_by_prof",
+                #     "description": "Keyword search for class professor",
+                #     "parameters": {
+                #         "type": "object",
+                #         "properties": {
+                #             "search_query": {
+                #                 "type": "string",
+                #                 "description": "If the ask is related to a specific proffesor/teacher/instructor for a class eg: 'Which CSE classes does Hal Perkins teach' then only consider classes that explicitly mention Hal Perkins and show the details.",
+                #             },
+                #         },
+                #         "required": ["search_query"],
+                #     },
+                # },
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
@@ -160,11 +182,17 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         if isinstance(query_text, dict):
             # update the filters to narrow down class by level
             level = query_text.get("level")
+            major = query_text.get("major")
             if level:
                 if not filter:
                     filter = "level ge " + str(level) + " and level lt " + str(int(level) + 100)
                 else:
                     filter += "and level ge " + str(level) + " and level lt " + str(level + 100)
+            if major:
+                if not filter:
+                    filter = "major eq " + "'" + major + "'"
+                else:
+                    filter += " and major eq " + "'" + major + "'"
             query_text = query_text.get("search_query")
 
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query

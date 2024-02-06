@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap');
+
 .examplesNavList {
     list-style: none;
     padding-left: 0;
@@ -27,6 +29,7 @@
 }
 
 .exampleText {
+    font-family: 'Open Sans', sans-serif;
     margin: 0;
     font-size: 22px;
     width: 280px;

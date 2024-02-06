@@ -81,6 +81,8 @@ class SearchManager:
                 SimpleField(name="sourcefile", type="Edm.String", filterable=True, facetable=True),
                 # Add level field to the index
                 SimpleField(name="level", type="Edm.Int32", filterable=True, facetable=True, sortable=True, searchable=True),
+                # Add major field to the index
+                SimpleField(name="major", type="Edm.String", filterable=True, facetable=True, sortable=True, searchable=True),
             ]
             if self.use_acls:
                 fields.append(
@@ -157,6 +159,7 @@ class SearchManager:
                         "id": f"{section.content.filename_to_id()}-page-{section_index + batch_index * MAX_BATCH_SIZE}",
                         "content": section.split_page.text,
                         "level": section.split_page.level,
+                        "major": section.split_page.major.lower(),
                         "category": section.category,
                         "sourcepage": (
                             BlobManager.blob_image_name_from_file_page(

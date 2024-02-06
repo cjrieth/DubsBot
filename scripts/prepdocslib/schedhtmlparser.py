@@ -47,7 +47,15 @@ class LocalHtmlParser(Parser):
 
     async def parse(self, content: IO) -> AsyncGenerator[Page, None]:
 
+
         soup = BeautifulSoup(content, 'html.parser')
+        try:
+            with open("./data/"+ content.name[7:]  + ".1") as extra:
+                # save catalog info
+                additional_info = BeautifulSoup(extra, 'html.parser')
+        except:
+            # there is no catalog info for this major
+            additional_info = None
 
         transformed_sched = "Spring 2024 Time Schedule\n\n"
 
@@ -72,7 +80,7 @@ class LocalHtmlParser(Parser):
                             transformed_sched += "---------------------\n"
                             split_string = re.split("\s{2}", string)
                             transformed_sched += "Class: " + split_string[0] +  split_string[1]
-                            last_class_name = string
+                            class_name = split_string[0].lower().strip() + split_string[1].strip()
                         elif j == 1:
                             transformed_sched += " Name: " + string
                         elif j == 2:
@@ -83,6 +91,11 @@ class LocalHtmlParser(Parser):
                         else:
                             transformed_sched += string
                         j = j + 1
+                    if additional_info:
+                        transformed_sched += "\n"
+                        filter_catalog = additional_info.find_all("a", {"name": class_name})
+                        if len(filter_catalog) > 0:
+                            transformed_sched += "Course Description: " + filter_catalog[0].get_text()
                     transformed_sched += "\n\n"
                 else:
                     # this is a section for the previous class
@@ -125,4 +138,6 @@ class LocalHtmlParser(Parser):
             #      debug_output.write(transformed_sched)
 
             yield Page(0, 0, transformed_sched)
+
+
             

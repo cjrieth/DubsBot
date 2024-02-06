@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap');
+
+
 .answerContainer {
     padding: 20px;
     background: rgb(249, 249, 249);
@@ -13,6 +16,7 @@
 }
 
 .answerText {
+    font-family: 'Open Sans', sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 22px;

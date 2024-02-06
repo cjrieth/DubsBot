@@ -78,7 +78,8 @@ async def setup_file_strategy(credential: AsyncTokenCredential, args: Any) -> Fi
         ".pdf": FileProcessor(pdf_parser, sentence_text_splitter),
         ".json": FileProcessor(JsonParser(), SimpleTextSplitter()),
         ".docx": FileProcessor(doc_int_parser, sentence_text_splitter),
-        ".html": FileProcessor(LocalHtmlParser(), ScheduleTextSplitter()), 
+        ".html": FileProcessor(LocalHtmlParser(), ScheduleTextSplitter()),
+        ".1": None,
     }
     use_vectors = not args.novectors
     embeddings: Optional[OpenAIEmbeddings] = None
