@@ -53,7 +53,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
     @property
     def system_message_chat_conversation(self):
         return """You are the friendly University of Washington school mascot, a Husky named Dubs. You assist students in planning their course schedules and degree goals. Act animated and behave like a dog.
-        Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
+        Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say that the classes in questions do not exist or are not in your database. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
         For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question.
         Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
         {follow_up_questions_prompt}
@@ -123,38 +123,26 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                         "properties": {
                             "search_query": {
                                 "type": "string",
-                                "description": "If the ask is related to a specific major and/or a specific level eg: 'Show me some 300 level cse classes' put the whole query here.",
+                                "description": "If the ask is related to a specific major and/or a specific level eg: 'Show me some 300 level cse classes' put the whole query here. Keep referenced major AS IS, do NOT expand",
                             },
                             "major": {
                                 "type": "string",
-                                "description": "If the ask is related to a specific major eg: 'Show me some cse classes' set to the major they are querying.",
+                                "description": "If the ask is related to a specific major eg: 'Show me some cse classes' set to the major they are querying. Set ONLY to the specific text for the major, do not expand.",
                             },
                             "level": {
                                 "type": "string",
                                 "description": "If the ask is related to a class at a certain level eg: 'Show me the details for 100 level classes' set to the level they are querying.",
+                            },
+                            "instructor": {
+                                "type": "string",
+                                "description": "If the ask is related to a specific instructor/professor/teacher eg: 'What CSE classes does Jane Doe teach?' set to the instructor they are querying.",
                             }
                         },
-                        "required": ["search_query", "level", "major"],
+                        "required": ["search_query", "level", "major", "instructor"],
                     },
                 },
             }
         ]
-
-                #         "type": "function",
-                # "function": {
-                #     "name": "search_by_prof",
-                #     "description": "Keyword search for class professor",
-                #     "parameters": {
-                #         "type": "object",
-                #         "properties": {
-                #             "search_query": {
-                #                 "type": "string",
-                #                 "description": "If the ask is related to a specific proffesor/teacher/instructor for a class eg: 'Which CSE classes does Hal Perkins teach' then only consider classes that explicitly mention Hal Perkins and show the details.",
-                #             },
-                #         },
-                #         "required": ["search_query"],
-                #     },
-                # },
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
@@ -179,21 +167,38 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
         query_text = self.get_search_query(chat_completion, original_user_query)
 
+        # TODO: need a map of full major names to major code if I want to support pure major names
+        # TODO: it likes major names to be in caps, should force this somehow?
+        # TODO: support level ranges? eg less than level 200
+        # what 300 level cse classes DO NOT meet on Monday
+
+        # i just finished CSE 333 and I like operating systems, what should I take next
+
+        use_full_search_mode = False
         if isinstance(query_text, dict):
             # update the filters to narrow down class by level
             level = query_text.get("level")
             major = query_text.get("major")
+            instructor = query_text.get("instructor")
             if level:
-                if not filter:
-                    filter = "level ge " + str(level) + " and level lt " + str(int(level) + 100)
-                else:
-                    filter += "and level ge " + str(level) + " and level lt " + str(level + 100)
+                try:
+                    if not filter:
+                        filter = "level ge " + str(level) + " and level lt " + str(int(level) + 100)
+                    else:
+                        filter += "and level ge " + str(level) + " and level lt " + str(level + 100)
+                except:
+                    filter = None
             if major:
                 if not filter:
-                    filter = "major eq " + "'" + major + "'"
+                    filter = "major eq " + "'" + major.lower() + "'"
                 else:
-                    filter += " and major eq " + "'" + major + "'"
-            query_text = query_text.get("search_query")
+                    filter += " and major eq " + "'" + major.lower() + "'"
+            if instructor:
+                use_full_search_mode = True
+                has_vector = False
+                query_text = instructor
+            else:
+                query_text = query_text.get("search_query")
 
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
 
@@ -206,7 +211,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         if not has_text:
             query_text = None
 
-        results = await self.search(top, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions)
+        results = await self.search(top, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions, use_full_search_mode)
 
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=False)
         content = "\n".join(sources_content)

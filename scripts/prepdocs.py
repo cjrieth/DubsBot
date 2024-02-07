@@ -80,6 +80,7 @@ async def setup_file_strategy(credential: AsyncTokenCredential, args: Any) -> Fi
         ".docx": FileProcessor(doc_int_parser, sentence_text_splitter),
         ".html": FileProcessor(LocalHtmlParser(), ScheduleTextSplitter()),
         ".1": None,
+        ".sh" : None,
     }
     use_vectors = not args.novectors
     embeddings: Optional[OpenAIEmbeddings] = None

@@ -1,5 +1,6 @@
 from typing import IO, AsyncGenerator, Union
 import re
+import json
 
 from azure.ai.formrecognizer import DocumentTable
 from azure.ai.formrecognizer.aio import DocumentAnalysisClient
@@ -57,6 +58,8 @@ class LocalHtmlParser(Parser):
             # there is no catalog info for this major
             additional_info = None
 
+        
+
         transformed_sched = "Spring 2024 Time Schedule\n\n"
 
         h2_tag = soup.h2
@@ -64,6 +67,7 @@ class LocalHtmlParser(Parser):
               # if page is not as expected (meaning no schedule) skip it
               yield Page(0, 0, "")
         else:
+
             transformed_sched += h2_tag.contents[0]
             transformed_sched += h2_tag.contents[2]
 
@@ -81,6 +85,12 @@ class LocalHtmlParser(Parser):
                             split_string = re.split("\s{2}", string)
                             transformed_sched += "Class: " + split_string[0] +  split_string[1]
                             class_name = split_string[0].lower().strip() + split_string[1].strip()
+                            # build json file of full major to abv name mappings
+                            with open("/workspaces/azure-search-openai-demo/scripts/prepdocslib/major_abv.json", "r+") as file:
+                                major_dict = json.load(file)
+                                major_dict[soup.title.get_text().lower()] = split_string[0]
+                                file.seek(0)
+                                json.dump(major_dict, file)
                         elif j == 1:
                             transformed_sched += " Name: " + string
                         elif j == 2:
@@ -138,6 +148,10 @@ class LocalHtmlParser(Parser):
             #      debug_output.write(transformed_sched)
 
             yield Page(0, 0, transformed_sched)
+
+    async def retrieve_major_mapping(self) -> dict:
+        return self.major_mapping
+
 
 
             
