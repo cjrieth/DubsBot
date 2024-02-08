@@ -1,4 +1,6 @@
 from typing import Any, Coroutine, List, Literal, Optional, Union, overload
+import json
+import re
 
 from azure.search.documents.aio import SearchClient
 from azure.search.documents.models import VectorQuery
@@ -53,7 +55,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
     @property
     def system_message_chat_conversation(self):
         return """You are the friendly University of Washington school mascot, a Husky named Dubs. You assist students in planning their course schedules and degree goals. Act animated and behave like a dog.
-        Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say that the classes in questions do not exist or are not in your database. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
+        Answer ONLY with the facts listed in the list of sources below. If there isn't enough information say you do not know. Always let the students know to check the official course offerings. Do not generate answers that don't use the sources below. If the question is very broad ask clarifying questions.
         For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question.
         Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
         {follow_up_questions_prompt}
@@ -123,15 +125,15 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                         "properties": {
                             "search_query": {
                                 "type": "string",
-                                "description": "If the ask is related to a specific major and/or a specific level eg: 'Show me some 300 level cse classes' put the whole query here. Keep referenced major AS IS, do NOT expand",
+                                "description": "If the ask is related to a specific major and/or a specific level eg: 'Show me some 300 level cse classes' put the whole query here.",
                             },
                             "major": {
                                 "type": "string",
-                                "description": "If the ask is related to a specific major eg: 'Show me some cse classes' set to the major they are querying. Set ONLY to the specific text for the major, do not expand.",
+                                "description": "If the ask is related to a specific major eg: 'Show me some cse classes' set to the major they are querying.",
                             },
                             "level": {
                                 "type": "string",
-                                "description": "If the ask is related to a class at a certain level eg: 'Show me the details for 100 level classes' set to the level they are querying.",
+                                "description": "If the ask contains the word level eg: 'Show me the details for 100 level classes' set to the level they are querying. ONLY set this if the word 'level' is explicitly stated in the message.",
                             },
                             "instructor": {
                                 "type": "string",
@@ -167,12 +169,14 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
         query_text = self.get_search_query(chat_completion, original_user_query)
 
-        # TODO: need a map of full major names to major code if I want to support pure major names
-        # TODO: it likes major names to be in caps, should force this somehow?
         # TODO: support level ranges? eg less than level 200
-        # what 300 level cse classes DO NOT meet on Monday
 
+        # Good examples:
         # i just finished CSE 333 and I like operating systems, what should I take next
+        # Can't do:
+        # how often is CSE 333 offered
+        # how often is a class filled
+        # are there MUSIC theory classes for non majors
 
         use_full_search_mode = False
         if isinstance(query_text, dict):
@@ -181,14 +185,24 @@ class ChatReadRetrieveReadApproach(ChatApproach):
             major = query_text.get("major")
             instructor = query_text.get("instructor")
             if level:
-                try:
-                    if not filter:
-                        filter = "level ge " + str(level) + " and level lt " + str(int(level) + 100)
-                    else:
-                        filter += "and level ge " + str(level) + " and level lt " + str(level + 100)
-                except:
-                    filter = None
+                # only do a level filter if it was specifically asked for
+                if 'level' in query_text.get("search_query"):
+                    try:
+                        if not filter:
+                            filter = "level ge " + str(level) + " and level lt " + str(int(level) + 100)
+                        else:
+                            filter += "and level ge " + str(level) + " and level lt " + str(level + 100)
+                    except:
+                        filter = None
             if major:
+                with open("./approaches/major_abv.json") as file:
+                    abv_dict = json.load(file)
+                    # switch to abrev
+                    for key in sorted(abv_dict):
+                        # need to fix when majors have similar names
+                        if major.lower() in key: 
+                            major = abv_dict[key]
+                            break
                 if not filter:
                     filter = "major eq " + "'" + major.lower() + "'"
                 else:
@@ -199,6 +213,15 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                 query_text = instructor
             else:
                 query_text = query_text.get("search_query")
+        
+        # normalize week days and do/not
+        original_user_query = original_user_query.replace("monday", "Monday")
+        original_user_query = original_user_query.replace("tuesday", "Tuesday")
+        original_user_query = original_user_query.replace("wednesday", "Wednesday")
+        original_user_query = original_user_query.replace("thursday", "Thursday")
+        original_user_query = original_user_query.replace("friday", "Friday")
+        original_user_query = original_user_query.replace("do", "DO")
+        original_user_query = original_user_query.replace("not", "NOT")
 
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
 

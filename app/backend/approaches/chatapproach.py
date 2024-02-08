@@ -129,7 +129,7 @@ class ChatApproach(Approach, ABC):
         overrides: dict[str, Any],
         auth_claims: dict[str, Any],
         session_state: Any = None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]: 
         extra_info, chat_coroutine = await self.run_until_final_call(
             history, overrides, auth_claims, should_stream=False
         )
