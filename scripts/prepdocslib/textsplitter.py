@@ -35,7 +35,7 @@ class SentenceTextSplitter(TextSplitter):
         # Chunking is disabled when using GPT4V. To be updated in the future.
         if self.has_image_embeddings:
             for i, page in enumerate(pages):
-                yield SplitPage(page_num=i, text=page.text)
+                yield SplitPage(page_num=i, text=page.text, level=-1, major='')
 
         def find_page(offset):
             num_pages = len(pages)
@@ -50,7 +50,7 @@ class SentenceTextSplitter(TextSplitter):
 
         length = len(all_text)
         if length <= self.max_section_length:
-            yield SplitPage(page_num=find_page(0), text=all_text)
+            yield SplitPage(page_num=find_page(0), text=all_text, level=-1, major='')
             return
 
         start = 0
@@ -92,7 +92,7 @@ class SentenceTextSplitter(TextSplitter):
                 start += 1
 
             section_text = all_text[start:end]
-            yield SplitPage(level=0, page_num=find_page(start), text=section_text)
+            yield SplitPage(page_num=find_page(start), text=section_text, level=-1, major='')
 
             last_table_start = section_text.rfind("<table")
             if last_table_start > 2 * self.sentence_search_limit and last_table_start > section_text.rfind("</table"):
@@ -108,7 +108,7 @@ class SentenceTextSplitter(TextSplitter):
                 start = end - self.section_overlap
 
         if start + self.section_overlap < end:
-            yield SplitPage(level=0, page_num=find_page(start), text=all_text[start:end])
+            yield SplitPage(page_num=find_page(start), text=all_text[start:end], level=-1, major='')
 
 class ScheduleTextSplitter(TextSplitter):
     """

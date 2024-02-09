@@ -90,7 +90,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         has_text = overrides.get("retrieval_mode") in ["text", "hybrid", None]
         has_vector = overrides.get("retrieval_mode") in ["vectors", "hybrid", None]
         use_semantic_captions = True if overrides.get("semantic_captions") and has_text else False
-        top = overrides.get("top", 3)
+        top = overrides.get("top", 5)
         filter = self.build_filter(overrides, auth_claims)
         use_semantic_ranker = True if overrides.get("semantic_ranker") and has_text else False
 
@@ -111,6 +111,21 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                             "search_query": {
                                 "type": "string",
                                 "description": "Query string to retrieve documents from azure search eg: 'Health care plan'",
+                            }
+                        },
+                        "required": ["search_query"],
+                    },
+                },
+                "type": "function",
+                "function": {
+                    "name": "search_degree_requirements",
+                    "description": "Answer quesions based off of degree requirements",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "search_query": {
+                                "type": "string",
+                                "description": "Query string to ask about degree requirements eg: 'What are the CSE degree requirements'",
                             }
                         },
                         "required": ["search_query"],
@@ -203,10 +218,10 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                         if major.lower() in key: 
                             major = abv_dict[key]
                             break
-                if not filter:
-                    filter = "major eq " + "'" + major.lower() + "'"
-                else:
-                    filter += " and major eq " + "'" + major.lower() + "'"
+                # if not filter:
+                #     filter = "major eq " + "'" + major.lower() + "'"
+                # else:
+                #     filter += " and major eq " + "'" + major.lower() + "'"
             if instructor:
                 use_full_search_mode = True
                 has_vector = False
@@ -234,7 +249,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         if not has_text:
             query_text = None
 
-        results = await self.search(top, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions, use_full_search_mode)
+        results = await self.search(5, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions, use_full_search_mode)
 
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=False)
         content = "\n".join(sources_content)

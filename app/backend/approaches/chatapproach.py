@@ -76,7 +76,7 @@ class ChatApproach(Approach, ABC):
                 if tool.type != "function":
                     continue
                 function = tool.function
-                if function.name == "search_sources":
+                if function.name == "search_sources" or function.name == "search_degree_requirements":
                     arg = json.loads(function.arguments)
                     search_query = arg.get("search_query", self.NO_RESPONSE)
                     if search_query != self.NO_RESPONSE:
