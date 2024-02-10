@@ -191,6 +191,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         # Can't do:
         # how often is CSE 333 offered
         # how often is a class filled
+        
         # are there MUSIC theory classes for non majors
 
         use_full_search_mode = False
