@@ -15,3 +15,4 @@ types-Pillow
 cryptography
 python-jose[cryptography]
 bs4
+lynx
