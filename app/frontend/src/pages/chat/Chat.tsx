@@ -29,6 +29,7 @@ import { VectorSettings } from "../../components/VectorSettings";
 import { useMsal } from "@azure/msal-react";
 import { TokenClaimsDisplay } from "../../components/TokenClaimsDisplay";
 import { GPT4VSettings } from "../../components/GPT4VSettings";
+import { Tips } from "../../components/Tips"
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -270,11 +271,14 @@ const Chat = () => {
                 <div className={styles.chatContainer}>
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
-                            <img width="10%" height="10%" src={huskyPic}></img>
+                            <img width="auto" height="10%" src={huskyPic}></img>
                             {/* <SparkleFilled fontSize={"120px"} primaryFill={"rgba(51, 0, 111, 1)"} aria-hidden="true" aria-label="Chat logo" /> */}
                             <h1 className={styles.chatEmptyStateTitle}>Chat about UW courses!</h1>
+                            <h2 className={styles.chatEmptyStateSubtitle}>Tips for the best experience</h2>
+                            <Tips />
                             <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
                             <ExampleList onExampleClicked={onExampleClicked} useGPT4V={useGPT4V} />
+                            
                         </div>
                     ) : (
                         <div className={styles.chatMessageStream}>
@@ -339,7 +343,7 @@ const Chat = () => {
                     <div className={styles.chatInput}>
                         <QuestionInput
                             clearOnSend
-                            placeholder="Type a new question (e.g. does my plan cover annual eye exams?)"
+                            placeholder="Type a new question"
                             disabled={isLoading}
                             onSend={question => makeApiRequest(question)}
                         />

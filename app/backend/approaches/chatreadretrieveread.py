@@ -54,8 +54,8 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
     @property
     def system_message_chat_conversation(self):
-        return """You are the friendly University of Washington school mascot, a Husky named Dubs. You assist students in planning their course schedules and degree goals. Act animated and behave like a dog.
-        Answer ONLY with the facts listed in the list of sources below. If there isn't enough information say you do not know. Always let the students know to check the official course offerings. Do not generate answers that don't use the sources below. If the question is very broad ask clarifying questions.
+        return """You assist students in planning their course schedules and degree goals. You are the friendly University of Washington school mascot, a Husky named Dubs. Act animated and behave like a dog.
+        DO NOT answer questions about how many classes there are. Answer ONLY with the facts listed in the list of sources below. Always let the students know to check the official course offerings. Do not generate answers that don't use the sources below. If the question is very broad ask clarifying questions.
         For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question.
         Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
         {follow_up_questions_prompt}
@@ -97,7 +97,8 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         original_user_query = history[-1]["content"]
         user_query_request = "Generate search query for: " + original_user_query
 
-        # Add a funciton to only do text search on professor name
+        # TODO Modify class search to incorperate multiple major requests
+        # TODO support quantatative queries? eg how many CSE classes are there
 
         tools: List[ChatCompletionToolParam] = [
             {
@@ -144,7 +145,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                             },
                             "major": {
                                 "type": "string",
-                                "description": "If the ask is related to a specific major eg: 'Show me some cse classes' set to the major they are querying.",
+                                "description": "If the ask is related to a specific majors eg: 'Plan me a schedule with 1 communications class and 1 anthropology class' set to a list of majors they are querying. Set to a list if there are multiple majors.",
                             },
                             "level": {
                                 "type": "string",
@@ -184,8 +185,6 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
         query_text = self.get_search_query(chat_completion, original_user_query)
 
-        # TODO: support level ranges? eg less than level 200
-
         # Good examples:
         # i just finished CSE 333 and I like operating systems, what should I take next
         # Can't do:
@@ -198,7 +197,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         if isinstance(query_text, dict):
             # update the filters to narrow down class by level
             level = query_text.get("level")
-            major = query_text.get("major")
+            majors = query_text.get("major")
             instructor = query_text.get("instructor")
             if level:
                 # only do a level filter if it was specifically asked for
@@ -210,19 +209,30 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                             filter += "and level ge " + str(level) + " and level lt " + str(level + 100)
                     except:
                         filter = None
-            if major:
-                with open("./approaches/major_abv.json") as file:
-                    abv_dict = json.load(file)
-                    # switch to abrev
-                    for key in sorted(abv_dict):
-                        # need to fix when majors have similar names
-                        if major.lower() in key: 
-                            major = abv_dict[key]
-                            break
-                # if not filter:
-                #     filter = "major eq " + "'" + major.lower() + "'"
-                # else:
-                #     filter += " and major eq " + "'" + major.lower() + "'"
+            if majors:
+                if not isinstance(majors, list):
+                    majors = [majors]
+                first_major = True
+                for major in majors:
+                    with open("./approaches/major_abv.json") as file:
+                        abv_dict = json.load(file)
+                        # switch to abrev
+                        if major.lower() in abv_dict:
+                            major = abv_dict[major.lower()]
+                        # for key in sorted(abv_dict):
+                        #     # need to fix when majors have similar names
+                        #     if major.lower() in key: 
+
+                        #         break
+                    if not filter:
+                        filter = "(major eq " + "'" + major.lower() + "'"
+                        first_major = False
+                    elif first_major:
+                        filter += " and (major eq " + "'" + major.lower() + "'"
+                        first_major = False
+                    else:
+                        filter += " or major eq " + "'" + major.lower() + "'"
+                filter += ")"
             if instructor:
                 use_full_search_mode = True
                 has_vector = False
@@ -250,7 +260,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         if not has_text:
             query_text = None
 
-        results = await self.search(5, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions, use_full_search_mode)
+        results = await self.search(3, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions, use_full_search_mode)
 
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=False)
         content = "\n".join(sources_content)

@@ -3,9 +3,9 @@ import { Example } from "./Example";
 import styles from "./Example.module.css";
 
 const DEFAULT_EXAMPLES: string[] = [
-    "What are some 300 level CSE classes offered?",
-    "What are some Computer Science classes about AI?",
-    "I just finished CSE 333 and I like operating systems, what should I take next?"
+    "What are some classes on gender and sexuality?",
+    "I just finished CSE 333 and I like operating systems, what should I take next?",
+    "I want to learn more about investing.",
 ];
 
 const GPT4V_EXAMPLES: string[] = [
