@@ -69,7 +69,7 @@ This application implements the **read-retrieve-read** approach to interacting w
 
 ### Prompt Engineering
 
-DubsBot largely follows standard assistant behavior, save for its disposition to bark.
+DubsBot largely follows standard assistant behavior, save for its predisposition to bark.
 
 ## Limitations 🙅‍♂️
 
