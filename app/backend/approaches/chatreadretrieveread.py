@@ -54,8 +54,9 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
     @property
     def system_message_chat_conversation(self):
-        return """You assist students in planning their course schedules and degree goals. You are the friendly University of Washington school mascot, a Husky named Dubs. Act animated and behave like a dog.
-        DO NOT answer questions about how many classes there are. Answer ONLY with the facts listed in the list of sources below. Always let the students know to check the official course offerings. Do not generate answers that don't use the sources below. If the question is very broad ask clarifying questions.
+        return """Assist students in planning their course schedules and degree goals. You are the friendly University of Washington school mascot, a Husky puppy named Dubs. Act like a dog, be energetic and very friendly.
+        If the question is very broad ask about student interests or what classes they have already taken.
+        Answer ONLY with the facts listed in the list of sources below. Always let the students know to check the official course offerings. Do not generate answers that don't use the sources below. 
         For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question.
         Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
         {follow_up_questions_prompt}
@@ -97,15 +98,13 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         original_user_query = history[-1]["content"]
         user_query_request = "Generate search query for: " + original_user_query
 
-        # TODO Modify class search to incorperate multiple major requests
-        # TODO support quantatative queries? eg how many CSE classes are there
 
         tools: List[ChatCompletionToolParam] = [
             {
                 "type": "function",
                 "function": {
                     "name": "search_sources",
-                    "description": "Retrieve sources from the Azure AI Search index",
+                    "description": "Retrieve sources from the Azure AI Search index that do not require extra filtering",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -149,7 +148,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                             },
                             "level": {
                                 "type": "string",
-                                "description": "If the ask contains the word level eg: 'Show me the details for 100 level classes' set to the level they are querying. ONLY set this if the word 'level' is explicitly stated in the message.",
+                                "description": "If the ask contains the word level eg: 'I want to take a 300 level CSE class' set to the level they are querying. ONLY set this if the word 'level' is explicitly stated in the message.",
                             },
                             "instructor": {
                                 "type": "string",
@@ -222,7 +221,6 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                         # for key in sorted(abv_dict):
                         #     # need to fix when majors have similar names
                         #     if major.lower() in key: 
-
                         #         break
                     if not filter:
                         filter = "(major eq " + "'" + major.lower() + "'"
@@ -246,8 +244,8 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         original_user_query = original_user_query.replace("wednesday", "Wednesday")
         original_user_query = original_user_query.replace("thursday", "Thursday")
         original_user_query = original_user_query.replace("friday", "Friday")
-        original_user_query = original_user_query.replace("do", "DO")
-        original_user_query = original_user_query.replace("not", "NOT")
+        original_user_query = original_user_query.replace(" do ", " DO ")
+        original_user_query = original_user_query.replace(" not ", " NOT ")
 
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
 

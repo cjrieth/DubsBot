@@ -1,26 +1,27 @@
-
-
-# DubsBot | The Unoffical UW Course Schedule Chatbot
+# DubsBot | The Unoffical UW Course Schedule Chatbot 🐾
 
 
 ## Table of Contents
 
 - [Features](#features)
+- [Assistant Strengths](#assistant-strengths)
 - [How it works](#how-it-works)
+- [Limitations](#limitations)
+- [Future Additions](#future-additions)
 
 
-This is the home for DubsBot, a chatbot designed to assist University of Washington students in learning about available classes and planning their course schedules. This project was created for the Microsoft Azure AI Chat Hackathon.
+This is the home for DubsBot, a chatbot designed to assist University of Washington students in learning about available classes and planning their course schedules. This project was created for the [Microsoft Azure AI Chat Hackathon](https://github.com/microsoft/AI-Chat-App-Hack).
 
-This assistant is a RAG () chat application, it has been specially optimized and trained to utilize available UW Time Schedules.
+This assistant is a RAG (Retrieval Augmented Generation) chat application, it has been specially optimized and trained to utilize available UW Time Schedules.
 
-## Features
+## Features 💫
 
 * Chat about class offerings for Spring Quarter 2024
 * Compare topics, times, and instructors for courses
 * Find course offerings that fit your interests or build off of previous classes
 * See how course offerings fit with general degree requirments
 
-## Assistant Strengths
+## Assistant Strengths 💪
 
 DubsBot excels at digesting course information and providing recomendations based of off user interests or goals. Its structure as a converstational experience allows for clarifying questions and context based answers.
 
@@ -32,7 +33,7 @@ Students can expect the assistant to be very helpful in providing
 * What are some CSE classes about AI?
 * I just took ____ and want to continue learning ____, what should I take?
 
-## How it works
+## How it works ⚙️
 
 ### Data Ingestion
 
@@ -70,7 +71,7 @@ This application implements the **read-retrieve-read** approach to interacting w
 
 DubsBot largely follows standard assistant behavior, save for its disposition to bark.
 
-## Limitations
+## Limitations 🙅‍♂️
 
 This application currently has some limitations that many impact its ability to help with all questions.
 
@@ -78,8 +79,9 @@ This application currently has some limitations that many impact its ability to 
 * The assitant cannot access student specific documents and information, so it cannot make choices based off of a student's previous course load without being told explicity what the student has taken while chatting. eg: "What classes should I take to fufill my Natural Sciences credits?"
 * The assistant does not have access to internal UW course data, and as such cannot provide information on course trends, real time enrollment numbers, or unexpected changes to course offerings. eg: "How often is a CSE 143 totally filled?"
 * The assistant cannot actually register students for courses, registraton must be done through MyPlan. 
+* The assistant cannot see the entire search index at once, so it cannot answer questions about how many classes there are.
 
-## Future Goals
+## Future Additions 🔮
 
 * Allow for student supplied documents such as transcipts or existing course plans. This would allow the assistant to give personalized recommendations based on what classes the student is already planning to take, or which requirements they still need to fufill.
 * Make data from past and future quarters available. This would allow the assistant to give information on class offerings in the past or planned for the near future. 
