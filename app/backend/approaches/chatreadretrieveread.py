@@ -260,7 +260,7 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         if not has_text:
             query_text = None
 
-        results = await self.search(3, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions, use_full_search_mode)
+        results = await self.search(top, query_text, filter, vectors, use_semantic_ranker, use_semantic_captions, use_full_search_mode)
 
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=False)
         content = "\n".join(sources_content)

@@ -117,6 +117,9 @@ class Approach:
     ) -> List[Document]:
         # Use semantic ranker if requested and if retrieval mode is text or hybrid (vectors + text)
         if use_semantic_ranker and query_text:
+            search_mode = "any"
+            if use_full_search_mode:
+                search_mode = "all"
             results = await self.search_client.search(
                 search_text=query_text,
                 filter=filter,
@@ -127,6 +130,7 @@ class Approach:
                 top=top,
                 query_caption="extractive|highlight-false" if use_semantic_captions else None,
                 vector_queries=vectors,
+                search_mode=search_mode,
             )
         else:
             search_mode = "any"
