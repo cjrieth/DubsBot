@@ -25,8 +25,6 @@ This assistant is a RAG (Retrieval Augmented Generation) chat application, it ha
 
 DubsBot excels at digesting course information and providing recomendations based of off user interests or goals. Its structure as a converstational experience allows for clarifying questions and context based answers.
 
-Students can expect the assistant to be very helpful in providing 
-
 ### Example queries
 
 * Are there music theory classes availible for non majors?
