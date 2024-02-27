@@ -1,5 +1,6 @@
 # DubsBot | The Unoffical UW Course Schedule Chatbot 🐾
 
+<img width="1436" alt="dubsbot" src="https://github.com/cjrieth/DubsBot/assets/37090998/76a974d2-e49e-4fb4-992e-e10215ab060c">
 
 ## Table of Contents
 
@@ -10,7 +11,9 @@
 - [Future Additions](#future-additions)
 
 
-This is the home for DubsBot, a chatbot designed to assist University of Washington students in learning about available classes and planning their course schedules. This project was created for the [Microsoft Azure AI Chat Hackathon](https://github.com/microsoft/AI-Chat-App-Hack).
+This is the home for DubsBot, a chatbot designed to assist University of Washington students in learning about available classes and planning their course schedules. This project was created for the [Microsoft Azure AI Chat Hackathon](https://github.com/microsoft/AI-Chat-App-Hack). 
+
+## [See a video of it in action!](https://www.youtube.com/watch?v=6vsQVGIDVIk)
 
 This assistant is a RAG (Retrieval Augmented Generation) chat application, it has been specially optimized and trained to utilize available UW Time Schedules.
 
